@@ -1,0 +1,21 @@
+server:
+  port: 8083
+  error:
+    include-message: always
+spring:
+  application:
+    name: transaction-service
+  datasource:
+    url: jdbc:postgresql://localhost:5435/transaction_db
+    username: bank
+    password: bank
+  jpa:
+    hibernate:
+      ddl-auto: update
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+services:
+  account-url: ${ACCOUNT_SERVICE_URL:http://localhost:8082}

@@ -1,0 +1,17 @@
+server:
+  port: 8081
+  error:
+    include-message: always
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: jdbc:postgresql://localhost:5433/auth_db
+    username: bank
+    password: bank
+  jpa:
+    hibernate:
+      ddl-auto: update
+jwt:
+  secret: ${JWT_SECRET:change-me-in-production-min-32-chars-secret-key!!}
+  access-ttl-minutes: 15
