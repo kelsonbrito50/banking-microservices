@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Aggregator only (no shared parent): lets IDEs and `mvn -T` builds pick up
+     all five services from the repo root. Each service still inherits from
+     spring-boot-starter-parent independently. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.bank</groupId>
+  <artifactId>banking-microservices</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <modules>
+    <module>auth-service</module>
+    <module>account-service</module>
+    <module>transaction-service</module>
+    <module>notification-service</module>
+    <module>api-gateway</module>
+  </modules>
+</project>
