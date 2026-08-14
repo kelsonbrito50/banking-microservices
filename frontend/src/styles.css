@@ -1,0 +1,95 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #f4f6f8;
+  color: #1f2933;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: #102a43;
+  color: #fff;
+}
+
+.brand { font-weight: 700; font-size: 1.1rem; }
+
+header nav { display: flex; gap: 1rem; align-items: center; }
+header a { color: #d9e2ec; text-decoration: none; }
+header a:hover { color: #fff; }
+
+button {
+  padding: 0.55rem 1.1rem;
+  border: none;
+  border-radius: 6px;
+  background: #2f80ed;
+  color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+button:disabled { opacity: 0.6; cursor: default; }
+button.link {
+  background: none;
+  color: #d9e2ec;
+  padding: 0;
+  font-size: inherit;
+}
+button.link:hover { color: #fff; }
+
+main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+
+input {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.login-card, .transfer-card {
+  max-width: 380px;
+  margin: 3rem auto;
+  padding: 1.75rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(16, 42, 67, 0.08);
+}
+
+.error { color: #c53030; }
+
+.accounts { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+.account-card {
+  flex: 1 1 220px;
+  padding: 1.1rem 1.3rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(16, 42, 67, 0.08);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.account-card:hover { outline: 2px solid #2f80ed; }
+.account-card .number { color: #627d98; font-size: 0.85rem; }
+.account-card .balance { font-size: 1.5rem; font-weight: 700; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(16, 42, 67, 0.08);
+}
+th, td { padding: 0.65rem 0.9rem; text-align: left; }
+th { background: #f0f4f8; color: #486581; font-size: 0.85rem; }
+tr.completed td:last-child { color: #2f855a; font-weight: 600; }
+tr.failed td:last-child, tr.compensation_required td:last-child { color: #c53030; font-weight: 600; }
+tr.pending td:last-child { color: #b7791f; font-weight: 600; }

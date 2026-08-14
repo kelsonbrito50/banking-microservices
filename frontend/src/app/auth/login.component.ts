@@ -11,11 +11,13 @@ import { AuthService } from '../core/auth.service';
     <div class="login-card">
       <h2>Sign in</h2>
       <input [(ngModel)]="email" placeholder="Email" type="email" />
-      <input [(ngModel)]="password" placeholder="Password" type="password" />
+      <input [(ngModel)]="password" placeholder="Password (min 8 chars)" type="password" />
       <button (click)="submit()">Sign in</button>
+      <button class="secondary" (click)="registerAndLogin()">Create account</button>
       @if (error) { <p class="error">{{ error }}</p> }
     </div>
   `,
+  styles: [`.secondary { margin-left: 0.5rem; background: #486581; }`],
 })
 export class LoginComponent {
   email = '';
@@ -30,6 +32,15 @@ export class LoginComponent {
       error: (e) => (this.error = e.status === 423
         ? 'Account locked after too many attempts.'
         : 'Invalid email or password.'),
+    });
+  }
+
+  registerAndLogin() {
+    this.auth.register(this.email, this.password).subscribe({
+      next: () => this.submit(),
+      error: (e) => (this.error = e.status === 409
+        ? 'Email already registered — try signing in.'
+        : e.error?.message ?? 'Registration failed (password must be 8+ chars).'),
     });
   }
 }
