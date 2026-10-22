@@ -1,12 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BankingService, Account, Transfer } from '../core/banking.service';
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-dashboard',
+    imports: [CommonModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    template: `
     <h1>My Accounts</h1>
     <div class="accounts">
       @for (acc of accounts; track acc.id) {
@@ -29,7 +29,7 @@ import { BankingService, Account, Transfer } from '../core/banking.service';
         </tr>
       }
     </table>
-  `,
+  `
 })
 export class DashboardComponent implements OnInit {
   accounts: Account[] = [];

@@ -4,29 +4,31 @@
 # service directly. (For hybrid dev — infra in Docker, services via mvn — the
 # infra ports below are all you need.)
 
-x-jwt-secret: &jwt-secret ${JWT_SECRET:-change-me-in-production-min-32-chars-secret-key!!}
+# Secrets come from .env (copy .env.example). Compose refuses to start if they are missing.
+x-jwt-secret: &jwt-secret ${JWT_SECRET:?set JWT_SECRET in .env, see .env.example}
+x-db-password: &db-password ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env, see .env.example}
 
 services:
   postgres-auth:
     image: postgres:16-alpine
-    environment: { POSTGRES_DB: auth_db, POSTGRES_USER: bank, POSTGRES_PASSWORD: bank }
-    ports: ["5433:5432"]
+    environment: { POSTGRES_DB: auth_db, POSTGRES_USER: bank, POSTGRES_PASSWORD: *db-password }
+    ports: ["127.0.0.1:5433:5432"]
   postgres-account:
     image: postgres:16-alpine
-    environment: { POSTGRES_DB: account_db, POSTGRES_USER: bank, POSTGRES_PASSWORD: bank }
-    ports: ["5434:5432"]
+    environment: { POSTGRES_DB: account_db, POSTGRES_USER: bank, POSTGRES_PASSWORD: *db-password }
+    ports: ["127.0.0.1:5434:5432"]
   postgres-transaction:
     image: postgres:16-alpine
-    environment: { POSTGRES_DB: transaction_db, POSTGRES_USER: bank, POSTGRES_PASSWORD: bank }
-    ports: ["5435:5432"]
+    environment: { POSTGRES_DB: transaction_db, POSTGRES_USER: bank, POSTGRES_PASSWORD: *db-password }
+    ports: ["127.0.0.1:5435:5432"]
   redis:
     image: redis:7-alpine
-    ports: ["6379:6379"]
+    ports: ["127.0.0.1:6379:6379"]
   kafka:
     image: bitnamilegacy/kafka:3.7
     # Dual listeners: containers reach the broker at kafka:9092 (PLAINTEXT),
     # host processes at localhost:9092 (EXTERNAL, container port 9094).
-    ports: ["9092:9094"]
+    ports: ["127.0.0.1:9092:9094"]
     environment:
       KAFKA_CFG_NODE_ID: 0
       KAFKA_CFG_PROCESS_ROLES: controller,broker
@@ -40,12 +42,14 @@ services:
     depends_on: [postgres-auth]
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/auth_db
+      DB_PASSWORD: *db-password
       JWT_SECRET: *jwt-secret
   account-service:
     build: ./account-service
     depends_on: [postgres-account, redis, kafka]
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-account:5432/account_db
+      DB_PASSWORD: *db-password
       SPRING_DATA_REDIS_HOST: redis
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
   transaction-service:
@@ -53,6 +57,7 @@ services:
     depends_on: [postgres-transaction, kafka, account-service]
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-transaction:5432/transaction_db
+      DB_PASSWORD: *db-password
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       ACCOUNT_SERVICE_URL: http://account-service:8082
   notification-service:
@@ -62,7 +67,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
   api-gateway:
     build: ./api-gateway
-    ports: ["8080:8080"]
+    ports: ["127.0.0.1:8080:8080"]
     depends_on: [auth-service, account-service, transaction-service]
     environment:
       REDIS_HOST: redis

@@ -42,10 +42,16 @@ You'll need JDK 21, Maven, Node 18+, and Docker.
 git clone https://github.com/kelsonbrito50/banking-microservices.git
 cd banking-microservices
 
+# secrets: copy the template and fill in JWT_SECRET and POSTGRES_PASSWORD
+# (the file explains how to generate random values; .env is git-ignored)
+cp .env.example .env
+
 # infrastructure: 3x Postgres, Redis, Kafka
 docker compose up -d postgres-auth postgres-account postgres-transaction redis kafka
 
-# each service in its own terminal (on Windows, start-all.ps1 opens all five)
+# each service in its own terminal, with the .env values exported
+# (on Windows, start-all.ps1 loads .env and opens all five)
+set -a; . ./.env; set +a; export DB_PASSWORD="$POSTGRES_PASSWORD"
 mvn -f auth-service/pom.xml spring-boot:run
 mvn -f account-service/pom.xml spring-boot:run
 mvn -f transaction-service/pom.xml spring-boot:run

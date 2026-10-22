@@ -1,13 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [FormsModule],
-  template: `
+    selector: 'app-login',
+    imports: [FormsModule],
+    template: `
     <div class="login-card">
       <h2>Sign in</h2>
       <input [(ngModel)]="email" placeholder="Email" type="email" />
@@ -17,7 +16,8 @@ import { AuthService } from '../core/auth.service';
       @if (error) { <p class="error">{{ error }}</p> }
     </div>
   `,
-  styles: [`.secondary { margin-left: 0.5rem; background: #486581; }`],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styles: [`.secondary { margin-left: 0.5rem; background: #486581; }`]
 })
 export class LoginComponent {
   email = '';

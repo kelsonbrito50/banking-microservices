@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.2</version>
+    <version>3.5.16</version>
     <relativePath/>
   </parent>
   <groupId>com.bank</groupId>
@@ -12,10 +12,19 @@
   <version>1.0.0</version>
   <properties>
     <java.version>21</java.version>
-    <spring-cloud.version>2023.0.3</spring-cloud.version>
+    <spring-cloud.version>2025.0.3</spring-cloud.version>
+    <!-- Security overrides: patched versions of libraries managed by Spring Boot 3.5.16.
+         Remove each line once the Boot parent ships the same or a newer version. -->
+    <jackson-bom.version>2.21.7</jackson-bom.version>
+    <netty.version>4.1.137.Final</netty.version>
+    <tomcat.version>10.1.61</tomcat.version>
+    <postgresql.version>42.7.12</postgresql.version>
+    <log4j2.version>2.25.5</log4j2.version>
   </properties>
   <dependencyManagement>
     <dependencies>
+      <!-- Security override: patched Bouncy Castle (pulled in transitively) -->
+      <dependency><groupId>org.bouncycastle</groupId><artifactId>bcprov-jdk18on</artifactId><version>1.85</version></dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dependencies</artifactId>
@@ -26,7 +35,7 @@
     </dependencies>
   </dependencyManagement>
   <dependencies>
-    <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-gateway</artifactId></dependency>
+    <dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-gateway-server-webflux</artifactId></dependency>
     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-data-redis-reactive</artifactId></dependency>
     <dependency><groupId>io.jsonwebtoken</groupId><artifactId>jjwt-api</artifactId><version>0.12.6</version></dependency>
     <dependency><groupId>io.jsonwebtoken</groupId><artifactId>jjwt-impl</artifactId><version>0.12.6</version><scope>runtime</scope></dependency>

@@ -5,40 +5,42 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-      # Spoofing note: JwtAuthFilter overwrites (h.set) the X-User-* headers on
-      # every authenticated route, so client-supplied values never survive.
-      # Do NOT add RemoveRequestHeader default-filters for them — default and
-      # route filters are merged by index order, so the removal would run AFTER
-      # JwtAuthFilter and strip the identity it just set.
-      default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Origin
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins: "http://localhost:4200"
-            allowedMethods: "*"
-            allowedHeaders: "*"
-      routes:
-        - id: auth
-          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
-          predicates: [ "Path=/api/auth/**" ]
-        - id: accounts
-          uri: ${ACCOUNT_SERVICE_URL:http://localhost:8082}
-          predicates: [ "Path=/api/accounts/**" ]
-          filters: [ "JwtAuthFilter" ]
-        - id: transfers
-          uri: ${TRANSACTION_SERVICE_URL:http://localhost:8083}
-          predicates: [ "Path=/api/transfers/**" ]
-          filters:
-            - JwtAuthFilter
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 5
-                redis-rate-limiter.burstCapacity: 10
-                key-resolver: "#{@userKeyResolver}"
+      server:
+        webflux:
+          # Spoofing note: JwtAuthFilter overwrites (h.set) the X-User-* headers on
+          # every authenticated route, so client-supplied values never survive.
+          # Do NOT add RemoveRequestHeader default-filters for them — default and
+          # route filters are merged by index order, so the removal would run AFTER
+          # JwtAuthFilter and strip the identity it just set.
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Origin
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins: "http://localhost:4200"
+                allowedMethods: "*"
+                allowedHeaders: "*"
+          routes:
+            - id: auth
+              uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+              predicates: [ "Path=/api/auth/**" ]
+            - id: accounts
+              uri: ${ACCOUNT_SERVICE_URL:http://localhost:8082}
+              predicates: [ "Path=/api/accounts/**" ]
+              filters: [ "JwtAuthFilter" ]
+            - id: transfers
+              uri: ${TRANSACTION_SERVICE_URL:http://localhost:8083}
+              predicates: [ "Path=/api/transfers/**" ]
+              filters:
+                - JwtAuthFilter
+                - name: RequestRateLimiter
+                  args:
+                    redis-rate-limiter.replenishRate: 5
+                    redis-rate-limiter.burstCapacity: 10
+                    key-resolver: "#{@userKeyResolver}"
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: 6379
 jwt:
-  secret: ${JWT_SECRET:change-me-in-production-min-32-chars-secret-key!!}
+  secret: ${JWT_SECRET}

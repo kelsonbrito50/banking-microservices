@@ -1,12 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BankingService } from '../core/banking.service';
 
 @Component({
-  selector: 'app-transfer',
-  standalone: true,
-  imports: [FormsModule],
-  template: `
+    selector: 'app-transfer',
+    imports: [FormsModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    template: `
     <div class="transfer-card">
       <h2>Send money</h2>
       <input [(ngModel)]="from" placeholder="From account" />
@@ -17,7 +17,7 @@ import { BankingService } from '../core/banking.service';
       </button>
       @if (message) { <p>{{ message }}</p> }
     </div>
-  `,
+  `
 })
 export class TransferComponent {
   from = ''; to = ''; amount = 0;

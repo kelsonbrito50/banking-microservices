@@ -8,7 +8,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5435/transaction_db
     username: bank
-    password: bank
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
