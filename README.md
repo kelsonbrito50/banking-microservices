@@ -70,6 +70,7 @@ If you prefer the terminal:
 TOKEN=$(curl -s -X POST localhost:8080/api/auth/login -H 'Content-Type: application/json' \
   -d '{"email":"me@test.com","password":"password123"}' | jq -r .accessToken)
 
+# demo opening balance: 0 to 1000 (there is no deposit flow)
 curl -X POST localhost:8080/api/accounts -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' -d '{"initialDeposit":1000}'
 

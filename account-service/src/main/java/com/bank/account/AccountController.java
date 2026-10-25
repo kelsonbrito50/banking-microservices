@@ -1,6 +1,8 @@
 package com.bank.account;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +19,10 @@ public class AccountController {
     private final AccountService service;
     private final AccountRepository accounts;
 
-    public record CreateRequest(BigDecimal initialDeposit) {}
+    // Demo opening balance: there is no deposit flow, so new accounts may start
+    // with up to 1000. Without these limits a caller could open an account with
+    // any amount, or a negative balance.
+    public record CreateRequest(@PositiveOrZero @DecimalMax("1000.00") BigDecimal initialDeposit) {}
 
     // Identity comes from the X-User-Id header the gateway sets after JWT
     // verification — never from the request body, so a caller can only create
