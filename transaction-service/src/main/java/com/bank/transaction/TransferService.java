@@ -32,12 +32,15 @@ public class TransferService {
                            OutboxRepository outbox,
                            ObjectMapper mapper,
                            PlatformTransactionManager txManager,
+                           RestClient.Builder restClientBuilder,
                            @Value("${services.account-url}") String accountServiceUrl) {
         this.transactions = transactions;
         this.outbox = outbox;
         this.mapper = mapper;
         this.txTemplate = new TransactionTemplate(txManager);
-        this.accountClient = RestClient.create(accountServiceUrl);
+        // The auto-configured builder carries the spring.http.client timeouts
+        // from application.yml; RestClient.create() would have none.
+        this.accountClient = restClientBuilder.baseUrl(accountServiceUrl).build();
     }
 
     record AccountInfo(String accountNumber, Long userId) {}
@@ -50,8 +53,14 @@ public class TransferService {
      *  4. Debit source account
      *  5. Credit destination account
      *  6a. Success  -> COMPLETED + outbox event transfer.completed
-     *  6b. Failure  -> compensating credit back to source, FAILED + transfer.failed
+     *  6b. Credit rejected (4xx) -> compensating credit back to source, FAILED + transfer.failed
      *  6c. Compensation itself fails -> COMPENSATION_REQUIRED + ops alert event
+     *
+     * Only a 4xx is a definite "no": account-service rejected the call and its
+     * transaction rolled back. A 5xx or a timeout means the outcome is unknown,
+     * because the debit or credit may have committed before the error. Then the
+     * transfer is marked COMPENSATION_REQUIRED for a person to check. Refunding
+     * on a guess could create money; ignoring it could lose money.
      *
      * The REST calls run OUTSIDE any database transaction: each state change
      * commits in its own short transaction, so the record, its idempotency key
@@ -90,13 +99,15 @@ public class TransferService {
         } catch (HttpClientErrorException e) {
             return fail(tx, TransferTransaction.Status.FAILED, "transfer.failed",
                     "Debit failed: " + e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
+        } catch (Exception e) {
+            return outcomeUnknown(tx, "Debit", e);
         }
 
-        // 5. Credit — with compensating rollback on failure
+        // 5. Credit — refund the source only when the credit was clearly rejected
         try {
             moveFunds("/internal/accounts/credit", to, amount);
-        } catch (Exception e) {
-            log.warn("Credit failed, compensating debit on {}", from);
+        } catch (HttpClientErrorException e) {
+            log.warn("Credit rejected ({}), compensating debit on {}", e.getStatusCode(), from);
             try {
                 moveFunds("/internal/accounts/credit", from, amount);
             } catch (Exception compensationError) {
@@ -108,7 +119,9 @@ public class TransferService {
                         HttpStatus.INTERNAL_SERVER_ERROR);
             }
             return fail(tx, TransferTransaction.Status.FAILED, "transfer.failed",
-                    "Credit failed: " + e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+                    "Credit failed: " + e.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
+        } catch (Exception e) {
+            return outcomeUnknown(tx, "Credit", e);
         }
 
         // 6a. Success
@@ -144,6 +157,15 @@ public class TransferService {
         if (!fetchAccount(accountNumber).userId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account does not belong to caller");
         }
+    }
+
+    /** 5xx or timeout: the step may or may not have happened, so flag it instead of guessing. */
+    private TransferTransaction outcomeUnknown(TransferTransaction tx, String step, Exception e) {
+        log.error("{} outcome unknown for tx {}: manual check required", step, tx.getId(), e);
+        return fail(tx, TransferTransaction.Status.COMPENSATION_REQUIRED,
+                "transfer.compensation-required",
+                step + " outcome unknown — manual check required",
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /** Persists the terminal status + outbox event in their own transaction, THEN throws. */

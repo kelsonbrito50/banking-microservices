@@ -5,6 +5,12 @@ server:
 spring:
   application:
     name: transaction-service
+  # Calls to account-service: a hung service fails fast instead of holding the
+  # transfer thread forever. A timeout counts as "outcome unknown" in the saga.
+  http:
+    client:
+      connect-timeout: 2s
+      read-timeout: 5s
   datasource:
     url: jdbc:postgresql://localhost:5435/transaction_db
     username: bank
