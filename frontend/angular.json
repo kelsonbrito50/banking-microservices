@@ -45,9 +45,6 @@
       }
     }
   },
-  "cli": {
-    "analytics": "fad4ce25-e5cf-403a-82f7-e5a7aa661ec8"
-  },
   "schematics": {
     "@schematics/angular:component": {
       "type": "component"

@@ -1,4 +1,4 @@
-# Banking Microservices
+# Banking Microservices: Spring Boot 3, Kafka Saga, Transactional Outbox, API Gateway
 
 A digital banking app I built to get hands-on with the patterns that come up in real backend systems: distributed transactions, event-driven messaging, and API gateway security. You can register, open accounts, and send money between them through an Angular dashboard, while five Spring Boot services coordinate behind the scenes.
 
@@ -67,6 +67,9 @@ Then open http://localhost:4200, create an account, and try a transfer. Or run t
 If you prefer the terminal:
 
 ```bash
+curl -s -X POST localhost:8080/api/auth/register -H 'Content-Type: application/json' \
+  -d '{"email":"me@test.com","password":"password123"}'
+
 TOKEN=$(curl -s -X POST localhost:8080/api/auth/login -H 'Content-Type: application/json' \
   -d '{"email":"me@test.com","password":"password123"}' | jq -r .accessToken)
 
