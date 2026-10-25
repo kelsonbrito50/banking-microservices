@@ -14,8 +14,10 @@ import java.math.BigDecimal;
 
 /**
  * Service-to-service endpoints called by transaction-service. Deliberately
- * under /internal/** — the API gateway only routes /api/**, so these are not
- * reachable from outside the cluster.
+ * under /internal/** — the API gateway only routes /api/**, so clients can't
+ * reach them through it. The service itself listens on 127.0.0.1 by default
+ * (server.address), so other machines can't call it directly either. In Docker,
+ * BIND_ADDRESS=0.0.0.0 opens it to the compose network only; no port is published.
  */
 @RestController
 @RequestMapping("/internal/accounts")

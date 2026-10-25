@@ -1,5 +1,7 @@
 server:
   port: 8084
+  # Loopback by default; Docker sets BIND_ADDRESS=0.0.0.0 (see account-service).
+  address: ${BIND_ADDRESS:127.0.0.1}
 spring:
   application:
     name: notification-service

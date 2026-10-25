@@ -1,5 +1,8 @@
 server:
   port: 8082
+  # Loopback by default so /internal/** and the X-User-Id header can't be reached
+  # from the network when run with mvn. Docker sets BIND_ADDRESS=0.0.0.0.
+  address: ${BIND_ADDRESS:127.0.0.1}
   error:
     include-message: always
 spring:
